@@ -2,7 +2,7 @@ import IpSubnetCalculator from 'ip-subnet-calculator'
 
 function isNumber(n){
     try {
-        let pi = parseInt(n)
+        let pi = parseFloat(n)
         return !isNaN(pi)
     }catch(e){
         return false

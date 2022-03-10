@@ -40,3 +40,9 @@
 .error {
   color: #990033;
 }
+fieldset label {
+  width: 15em;
+  text-align: right;
+  display: inline-block;
+  margin-right: .5em;
+}
