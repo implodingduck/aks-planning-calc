@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/aks-planning-calc/static/css/main.8752261b.css",
-    "main.js": "/aks-planning-calc/static/js/main.9b7d11f3.js",
+    "main.css": "/aks-planning-calc/static/css/main.d173d207.css",
+    "main.js": "/aks-planning-calc/static/js/main.e4e0a7e3.js",
     "static/js/787.3217e8ab.chunk.js": "/aks-planning-calc/static/js/787.3217e8ab.chunk.js",
     "index.html": "/aks-planning-calc/index.html",
-    "main.8752261b.css.map": "/aks-planning-calc/static/css/main.8752261b.css.map",
-    "main.9b7d11f3.js.map": "/aks-planning-calc/static/js/main.9b7d11f3.js.map",
+    "main.d173d207.css.map": "/aks-planning-calc/static/css/main.d173d207.css.map",
+    "main.e4e0a7e3.js.map": "/aks-planning-calc/static/js/main.e4e0a7e3.js.map",
     "787.3217e8ab.chunk.js.map": "/aks-planning-calc/static/js/787.3217e8ab.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.8752261b.css",
-    "static/js/main.9b7d11f3.js"
+    "static/css/main.d173d207.css",
+    "static/js/main.e4e0a7e3.js"
   ]
 }
