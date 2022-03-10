@@ -3,10 +3,8 @@ import IpSubnetCalculator from 'ip-subnet-calculator'
 function isNumber(n){
     try {
         let pi = parseInt(n)
-        console.log('is a number: ' + pi)
         return !isNaN(pi)
     }catch(e){
-        console.log('NOT A NUMBER: ' + n)
         return false
     }
 }
@@ -21,6 +19,9 @@ function do_validation(cidr){
 }
 function CIDRUtils(){
     return {
+        isNumber: (n) => {
+            return isNumber(n)
+        },
         validate: (cidr) => {
             do_validation(cidr)
         },

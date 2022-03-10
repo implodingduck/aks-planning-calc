@@ -26,19 +26,37 @@ function App() {
   }
 
   const handleNumnodesChange = (e) => {
-    setNumnodes(e.target.value);
+    if ( cidrUtils.isNumber(e.target.value)){
+      setNumnodes(parseInt(e.target.value));
+    }else {
+      setNumnodes('');
+    }
+    
   }
 
   const handleNodecpuChange = (e) => {
-    setNodecpu(e.target.value);
+    if ( cidrUtils.isNumber(e.target.value)){
+      setNodecpu(parseInt(e.target.value));
+    }else{
+      setNodecpu('')
+    }
   }
 
   const handleNodememChange =  (e) => {
-    setNodemem(e.target.value);
+    if ( cidrUtils.isNumber(e.target.value)){
+      setNodemem(parseInt(e.target.value));
+    }else{
+      setNodemem('')
+    }
   }
 
   React.useEffect( () => {
+    console.log(`Num Nodes: ${numnodes}`)
+    console.log(numnodes + nplusone)
+    console.log(`IP Available: ${ipresults.ipAvailable}`)
+    console.log(`IP Available Post: ${ipresults.ipAvailable - azurereservedips - (numnodes + nplusone)}`)
     let maxPods = Math.floor((ipresults.ipAvailable - azurereservedips - (numnodes + nplusone)) / (numnodes + nplusone))
+    console.log(maxPods)
     setMaxPodsPerNode(maxPods)
     setAvgPodCpu(nodecpu / maxPods)
     let podMem = nodemem / maxPods
@@ -77,7 +95,7 @@ function App() {
         </div>
       </fieldset>
       <fieldset>
-        <legend>Results</legend>
+        <legend>Pods</legend>
         <p>Max number of pods per node: { maxPodsPerNode } (Accounting for N+1 for upgrades)</p>
         <p>Average vCPU per pod: {avgPodCpu}</p>
         <p>Average RAM per pod: {avgPodMem}</p>
