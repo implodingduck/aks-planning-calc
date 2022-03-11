@@ -9,10 +9,15 @@ function App() {
   const [ipresults, setIpresults] = React.useState(cidrUtils.range(starterCidr))
   const [numnodes, setNumnodes] = React.useState(3)
   const [nodecpu, setNodecpu] = React.useState(2)
+  const [reqNodecpu, setReqNodecpu] = React.useState(2)
   const [nodemem, setNodemem] = React.useState(7)
+  const [reqNodemem, setReqNodemem] = React.useState(7)
+  const [podsPerNode, setPodsPerNode] = React.useState(0)
   const [maxPodsPerNode, setMaxPodsPerNode] = React.useState(0)
   const [avgPodCpu, setAvgPodCpu] = React.useState(0)
+  const [maxPodCpu, setMaxPodCpu] = React.useState(0)
   const [avgPodMem, setAvgPodMem] = React.useState(0)
+  const [maxPodMem, setMaxPodMem] = React.useState(0)
   const [memunit, setMemunit] = React.useState(1024)
 
   const handleIpSpaceChange = (e) => {
@@ -53,25 +58,30 @@ function App() {
 
   const handleMemunitChange = (e) => {
     if ( cidrUtils.isNumber(e.target.value)){
+      if (memunit === parseFloat(1024)){
+        setAvgPodMem( avgPodMem / 1024 )
+      }else {
+        setAvgPodMem( avgPodMem * 1024 )
+      }
       setMemunit(parseInt(e.target.value))
     }else{
       setMemunit('')
     }
   }
 
-  const handleMaxpodspernodeChange = (e) => {
+  const handlePodspernodeChange = (e) => {
     if ( cidrUtils.isNumber(e.target.value)){
       console.log('Changing to: ' + e.target.value)
-      setMaxPodsPerNode(parseInt(e.target.value))
+      setPodsPerNode(parseInt(e.target.value))
     }else{
-      setMaxPodsPerNode('')
+      setPodsPerNode('')
     }
   }
   
   const handleAvgpodcpuChange = (e) => {
     if ( cidrUtils.isNumber(e.target.value)){
       setAvgPodCpu(parseFloat(e.target.value))
-      setNodecpu( parseFloat(e.target.value) * maxPodsPerNode )
+      setNodecpu( parseFloat(e.target.value) * podsPerNode )
     }else{
       setAvgPodCpu('')
     }
@@ -80,7 +90,7 @@ function App() {
   const handleAvgpodmemChange = (e) => {
     if ( cidrUtils.isNumber(e.target.value)){
       setAvgPodMem(parseFloat(e.target.value))
-      setNodemem( parseFloat(e.target.value) * maxPodsPerNode )
+      setReqNodemem( (parseFloat(e.target.value) * podsPerNode) / memunit )
     }else{
       setAvgPodMem('')
     }
@@ -90,18 +100,34 @@ function App() {
     return Math.floor((ipresults.ipAvailable - azurereservedips - (numnodes + nplusone)) / (numnodes + nplusone))
   }, [ipresults, numnodes])
 
+  // DETERMINE MAX PODS
   React.useEffect( () => {
     let maxPods = computeTotalMaxPods()
-    if (maxPodsPerNode > maxPods || maxPodsPerNode === 0){
-      setMaxPodsPerNode(maxPods)
+    setMaxPodsPerNode(maxPods)
+    if ( podsPerNode === 0 ){
+      setPodsPerNode(maxPods)
     }
-  }, [maxPodsPerNode, ipresults, numnodes, computeTotalMaxPods])
+  }, [maxPodsPerNode, podsPerNode, ipresults, numnodes, computeTotalMaxPods])
   
+  // DETERMINE MAX CPU
   React.useEffect( () => {
-    setAvgPodCpu(nodecpu / maxPodsPerNode)
-    let podMem = nodemem / maxPodsPerNode
-    setAvgPodMem(podMem * memunit)
-  }, [maxPodsPerNode, nodecpu, nodemem, memunit])
+    let newMaxPodCpu = nodecpu / podsPerNode
+    setMaxPodCpu(newMaxPodCpu)
+    let newReqNodecpu = avgPodCpu * podsPerNode
+    setReqNodecpu(newReqNodecpu)
+    if(avgPodCpu === 0 || avgPodCpu === Infinity){
+      setAvgPodCpu(newMaxPodCpu)
+    }
+  }, [nodecpu, avgPodCpu, podsPerNode])
+
+  // DETERMINE MAX MEM
+  React.useEffect( () => {
+    let podMem = nodemem / podsPerNode
+    setMaxPodMem(podMem * memunit)
+    if (avgPodMem === 0 || avgPodMem === Infinity){
+      setAvgPodMem(podMem * memunit)
+    }
+  }, [podsPerNode, nodemem, memunit, avgPodMem])
 
   //const kubesystempods = 18
   const nplusone = 1
@@ -118,11 +144,11 @@ function App() {
         </div>
         <div>
           <label htmlFor="nodecpu">Node vCPU(s):</label>
-          <input type="number" name="nodecpu" onChange={handleNodecpuChange} value={nodecpu} />
+          <input type="number" name="nodecpu" onChange={handleNodecpuChange} value={nodecpu} /> (Actual Required: {reqNodecpu})
         </div>
         <div>
           <label htmlFor="nodemem">Node RAM (GB):</label>
-          <input type="number" name="nodemem" onChange={handleNodememChange} value={nodemem} />
+          <input type="number" name="nodemem" onChange={handleNodememChange} value={nodemem} /> (Actual Required: {reqNodemem})
         </div>
         <a href="https://azure.microsoft.com/en-us/pricing/details/virtual-machines/linux/">Azure Instance Sizes</a>
       </fieldset>
@@ -137,18 +163,18 @@ function App() {
       <fieldset>
         <legend>Pods</legend>
         <div>
-          <label hmtlFor="maxpodspernode">Max number of pods per node:</label>
-          <input type="number" onChange={handleMaxpodspernodeChange} name="maxpodspernode" value={ maxPodsPerNode } /> (Accounting for N+1 for upgrades)
+          <label hmtlFor="podspernode">Max number of pods per node:</label>
+          <input type="number" onChange={handlePodspernodeChange} name="podspernode" value={ podsPerNode } /> (Actual Max: {maxPodsPerNode} Accounting for N+1 for upgrades)
         </div>
         <div>
           <label htmlFor="avgpodcpu">Average vCPU per pod:</label>
-          <input type="number" onChange={handleAvgpodcpuChange} name="avgpodcpu" value={avgPodCpu} />
+          <input type="number" step=".001" onChange={handleAvgpodcpuChange} name="avgpodcpu" value={avgPodCpu} /> (Actual Max: {maxPodCpu})
         </div>
         <div>
           <label htmlFor="avgpodmem">Average RAM per pod:</label>
-          <input type="number" onChange={handleAvgpodmemChange} name="avgpodmem" value={avgPodMem} />
+          <input type="number" step=".01" onChange={handleAvgpodmemChange} name="avgpodmem" value={avgPodMem} /> (Actual Max: {maxPodMem})
           <select value={memunit} onChange={handleMemunitChange} >
-            <option value="1">GB</option>
+            <option value="1">GB</option> 
             <option value="1024">MB</option>
           </select>
         </div>
