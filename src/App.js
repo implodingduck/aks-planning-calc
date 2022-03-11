@@ -113,8 +113,6 @@ function App() {
   React.useEffect( () => {
     let newMaxPodCpu = nodecpu / podsPerNode
     setMaxPodCpu(newMaxPodCpu)
-    let newReqNodecpu = avgPodCpu * podsPerNode
-    setReqNodecpu(newReqNodecpu)
     if(avgPodCpu === 0 || avgPodCpu === Infinity){
       setAvgPodCpu(newMaxPodCpu)
     }
@@ -122,12 +120,22 @@ function App() {
 
   // DETERMINE MAX MEM
   React.useEffect( () => {
-    let podMem = nodemem / podsPerNode
-    setMaxPodMem(podMem * memunit)
+    let podMem = nodemem / podsPerNode * memunit
+    setMaxPodMem(podMem)
     if (avgPodMem === 0 || avgPodMem === Infinity){
-      setAvgPodMem(podMem * memunit)
+      setAvgPodMem(podMem)
     }
   }, [podsPerNode, nodemem, memunit, avgPodMem])
+
+  // ADJUST NODE STUFF
+  React.useEffect( () => {
+    if ( nodecpu < reqNodecpu ){
+      setNodecpu(reqNodecpu)
+    }
+    if ( nodemem < reqNodemem ) {
+      setNodemem(reqNodemem)
+    }
+  }, [nodecpu, reqNodecpu, nodemem, reqNodemem])
 
   //const kubesystempods = 18
   const nplusone = 1
@@ -153,7 +161,7 @@ function App() {
         <a href="https://azure.microsoft.com/en-us/pricing/details/virtual-machines/linux/">Azure Instance Sizes</a>
       </fieldset>
       <fieldset>
-        <legend>Network</legend>
+        <legend>Network (Azure CNI)</legend>
         <label htmlFor='ipspace'>Subnet CIDR:</label>
         <input type="text" onChange={handleIpSpaceChange} name="ipspace" value={ipspace}/>
         <div>
