@@ -33,7 +33,7 @@ function App() {
 
   const handleNumnodesChange = (e) => {
     if ( cidrUtils.isNumber(e.target.value)){
-      setNumnodes(parseInt(e.target.value));
+      setNumnodes(parseFloat(e.target.value));
     }else {
       setNumnodes('');
     }
@@ -42,7 +42,8 @@ function App() {
 
   const handleNodecpuChange = (e) => {
     if ( cidrUtils.isNumber(e.target.value)){
-      setNodecpu(parseInt(e.target.value));
+      console.log(`Trying to change CPU to: ${e.target.value}`)
+      setNodecpu(parseFloat(e.target.value));
     }else{
       setNodecpu('')
     }
@@ -81,7 +82,7 @@ function App() {
   const handleAvgpodcpuChange = (e) => {
     if ( cidrUtils.isNumber(e.target.value)){
       setAvgPodCpu(parseFloat(e.target.value))
-      setNodecpu( parseFloat(e.target.value) * podsPerNode )
+      setReqNodecpu( parseFloat(e.target.value) * podsPerNode )
     }else{
       setAvgPodCpu('')
     }
@@ -127,7 +128,7 @@ function App() {
     }
   }, [podsPerNode, nodemem, memunit, avgPodMem])
 
-  // ADJUST NODE STUFF
+  // ADJUST based on req/max
   React.useEffect( () => {
     if ( nodecpu < reqNodecpu ){
       setNodecpu(reqNodecpu)
