@@ -46,3 +46,7 @@ fieldset label {
   display: inline-block;
   margin-right: .5em;
 }
+fieldset {
+  max-width: 60em;
+  margin: auto
+}
